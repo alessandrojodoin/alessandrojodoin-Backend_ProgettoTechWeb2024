@@ -9,3 +9,42 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  username    String  @id
+  password    String
+  postedIdeas Idea[]
+  votes       Vote[]
+  comments    Comment[]
+}
+
+model Idea {
+  id              Int       @id @default(autoincrement())
+  title           String
+  description     String
+  createdAt       DateTime  
+  author          User      @relation(fields: [authorUsername], references: [username])
+  authorUsername  String
+  votes           Vote[]
+  comments        Comment[]
+
+}
+
+model Vote {
+  type          Int
+  voter         User    @relation(fields: [voterUsername], references: [username])
+  voterUsername String
+  idea          Idea    @relation(fields: [ideaId], references: [id])
+  ideaId        Int
+  
+  @@id([voterUsername, ideaId])
+}
+
+model Comment {
+  id              Int     @id @default(autoincrement())
+  text            String
+  author          User    @relation(fields: [authorUsername], references: [username])
+  authorUsername  String
+  idea            Idea    @relation(fields: [ideaId], references: [id])
+  ideaId          Int
+}
