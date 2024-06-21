@@ -58,5 +58,15 @@ export class IdeaController {
         const transaction = await database.$transaction([deleteVotes, deleteComments, deleteIdea]);
     }
 
+    static async findIdea(id: number){
+        const foundIdea = await database.idea.findUnique({
+            where: {
+                id: id
+            }
+        })
+
+        return foundIdea
+    }
+
 
 }
