@@ -22,7 +22,7 @@ model Idea {
   id              Int       @id @default(autoincrement())
   title           String
   description     String
-  createdAt       DateTime  
+  createdAt       DateTime  @default(now())
   author          User      @relation(fields: [authorUsername], references: [username])
   authorUsername  String
   votes           Vote[]
