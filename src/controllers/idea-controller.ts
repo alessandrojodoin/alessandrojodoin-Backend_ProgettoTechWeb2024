@@ -17,8 +17,45 @@ export class IdeaController {
         })
     }
 
-    static async getIdeas(){
-        const Ideas = await database.idea.findMany();
+    static async getIdeas(filters: ((element: Idea) => boolean)[], includeComments = false, includeAuthor = true, includeVotes = true){
+        var includedRelations = {
+            author: includeAuthor,
+            votes: includeVotes,
+            comments: includeComments
+        }
+        
+        const Ideas = await database.idea.findMany({
+            include: includedRelations
+        });
+
+        filters.forEach(element => {
+            Array.prototype.filter(element);
+        });
+
+        return Ideas;
+
+    }
+
+    static async deleteIdea(id: number){
+        const deleteVotes = database.vote.deleteMany({
+            where:{
+                ideaId: id,
+            }
+        })
+
+        const deleteComments = database.comment.deleteMany({
+            where:{
+                ideaId: id,
+            }
+        })
+
+        const deleteIdea = database.idea.delete({
+            where: {
+                id: id
+            }
+        })
+
+        const transaction = await database.$transaction([deleteVotes, deleteComments, deleteIdea]);
     }
 
 
