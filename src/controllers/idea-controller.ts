@@ -2,8 +2,29 @@ import { User } from "@prisma/client";
 import { Idea } from "@prisma/client";
 import database from "../database.js";
 
+const titleMaxLength = 100;
+const descriptionMaxLength = 400;
+
 
 export class IdeaController {
+
+    static ideaValidator(idea: {title: string, description: string, author: User}): true | string[]{
+        let errors: string[] = [];
+        if(idea.title.length === 0){
+            errors.push("Title must be specified.");
+        }
+        if(idea.title.length >= titleMaxLength){
+            errors.push(`Title must not exceed ${titleMaxLength}.`);
+        }
+        if(idea.description.length >= descriptionMaxLength){
+            errors.push(`Description must not exceed ${descriptionMaxLength}.`);
+        }
+
+        if(errors.length === 0){
+            return true
+        }
+        else return errors;
+    }
 
     static async saveIdea(idea: {title: string, description: string, author: User}){
         const newIdea = await database.idea.create({
@@ -17,7 +38,7 @@ export class IdeaController {
         })
     }
 
-    static async getIdeas(filters: ((element: Idea) => boolean)[], includeComments = false, includeAuthor = true, includeVotes = true){
+    static async getIdeas(includeComments = false, includeAuthor = true, includeVotes = true){
         var includedRelations = {
             author: includeAuthor,
             votes: includeVotes,
@@ -28,9 +49,6 @@ export class IdeaController {
             include: includedRelations
         });
 
-        filters.forEach(element => {
-            Array.prototype.filter(element);
-        });
 
         return Ideas;
 
