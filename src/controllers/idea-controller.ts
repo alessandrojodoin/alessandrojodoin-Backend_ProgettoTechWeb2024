@@ -8,7 +8,7 @@ const descriptionMaxLength = 400;
 
 export class IdeaController {
 
-    static ideaValidator(idea: {title: string, description: string, author: User}): true | string[]{
+    static validateIdea(idea: {title: string, description: string, author: User}): true | string[]{
         let errors: string[] = [];
         if(idea.title.length === 0){
             errors.push("Title must be specified.");

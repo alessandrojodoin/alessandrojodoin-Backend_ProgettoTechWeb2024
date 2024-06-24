@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import database from "../database.js";
-
+import Jwt from "jsonwebtoken";
 
 export class AuthController{
     static hashPassword(password: string): string{
@@ -17,6 +17,20 @@ export class AuthController{
                 password: hashedPassword
             }
         })
+    }
+
+    static issueToken(username: string): string{
+        return Jwt.sign({user: username}, process.env.TOKEN_SECRET, {expiresIn: `${24*60*60}s`});
+    }
+
+    static async findUser(username: string){
+        const foundUser = await database.user.findUnique({
+            where: {
+                username: username
+            }
+        })
+
+        return foundUser;
     }
 
 }

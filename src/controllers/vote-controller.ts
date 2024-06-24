@@ -25,7 +25,7 @@ export class VoteController{
                 }
             },
             update: {
-                type: vote.voteType === "upvote" ? 1 : -1;
+                type: vote.voteType === "upvote" ? 1 : -1
             }
         })
     }
