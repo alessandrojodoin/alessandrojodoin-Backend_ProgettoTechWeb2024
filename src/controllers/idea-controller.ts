@@ -8,6 +8,8 @@ const descriptionMaxLength = 400;
 
 export class IdeaController {
 
+    //Checks to see if an idea's fields meet their respective requirements.
+    //Returns true if there are no issues, else it returns an array of error messages
     static validateIdea(idea: {title: string, description: string, author: User}): true | string[]{
         let errors: string[] = [];
         if(idea.title.length === 0){
@@ -26,6 +28,7 @@ export class IdeaController {
         else return errors;
     }
 
+    //Saves an idea into the database
     static async saveIdea(idea: {title: string, description: string, author: User}){
         const newIdea = await database.idea.create({
             data: {

@@ -41,5 +41,13 @@ export class VoteController{
         })
     }
 
+    static async getVotes(idea: Idea){
+        const foundVotes = await database.vote.findMany({
+            where: {
+                idea: idea
+            }
+        })
+        return foundVotes
+    }
 
 }
