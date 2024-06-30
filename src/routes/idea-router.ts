@@ -3,6 +3,7 @@ import { IdeaController } from "../controllers/idea-controller.js";
 import { json } from "stream/consumers";
 import { AuthController } from "../controllers/auth-controller.js";
 import { VoteController } from "../controllers/vote-controller.js";
+import { enforceAuthentication, enforceIdeaAuthorization } from "../middleware/authorization.js";
 
 export const ideaRouter = express.Router();
 
@@ -16,7 +17,7 @@ ideaRouter.get("/ideas/:id", (req, res) => {
     IdeaController.findIdea(Number(req.params.id))
     .then(foundIdea => {
         if(foundIdea === null){
-            res.status(404).send("Idea not found.");
+            res.status(404).send("Idea was not found.");
         }
         else{
             res.status(200).json(foundIdea);
@@ -28,10 +29,10 @@ ideaRouter.get("/ideas/:id", (req, res) => {
 ideaRouter.post("/ideas", async (req, res) => {
     let idea = req.body;
     //Find User
-    const user = await AuthController.findUser(idea.userUsername);
+    const user = await AuthController.findUser(req.body.username);
 
     idea.author = user;
-    delete idea.userUsername;
+    delete idea.username;
 
     const isIdeaValid = IdeaController.validateIdea(idea);
 
@@ -39,15 +40,16 @@ ideaRouter.post("/ideas", async (req, res) => {
         IdeaController.saveIdea(idea);
     }
     else{
-
+        res.status(400).send("Request is not valid");
     }
 
 
 })
 
-ideaRouter.delete("/ideas/:id", (req, res) => {
+ideaRouter.delete("/ideas/:id", enforceIdeaAuthorization, (req, res) => {
     
     IdeaController.deleteIdea(Number(req.params.id));
+    res.send("Idea deleted.");
 
 })
 
@@ -56,9 +58,39 @@ ideaRouter.delete("/ideas/:id", (req, res) => {
 ideaRouter.get("/ideas/:id/votes", async (req, res) => {
     const idea = await IdeaController.findIdea(Number(req.params.id));
 
-    if(idea){
-        res.json(VoteController.getVotes(idea));
+    if(idea !== null){
+        res.status(200).json(await VoteController.getVotes(idea));
     }
-    
+    else{
+        res.status(404).send("Idea does not exist");
+    }
+})
 
+ideaRouter.post("/ideas/:id/votes", async (req, res) => {
+    const idea = await IdeaController.findIdea(Number(req.params.id));
+
+    if(idea !== null){
+
+        const user = await AuthController.findUser(req.body.username);
+
+        VoteController.saveVote({voteType: req.body, user: user, idea: idea});
+        res.status(200).json(await VoteController.getVotes(idea));
+    }
+    else{
+        res.status(404).send("Idea does not exist");
+    }
+})
+
+ideaRouter.delete("/ideas/:id/votes", async (req, res) => {
+    const idea = await IdeaController.findIdea(Number(req.params.id));
+
+    if(idea !== null){
+
+        const user = await AuthController.findUser(req.body.username);
+        VoteController.cancelVote({user: user, idea: idea});
+        res.status(200).send("Vote removed");
+    }
+    else{
+        res.status(404).send("Idea does not exist");
+    }
 })

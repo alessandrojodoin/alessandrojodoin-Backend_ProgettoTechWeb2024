@@ -12,20 +12,28 @@ export class IdeaController {
     //Returns true if there are no issues, else it returns an array of error messages
     static validateIdea(idea: {title: string, description: string, author: User}): true | string[]{
         let errors: string[] = [];
-        if(idea.title.length === 0){
-            errors.push("Title must be specified.");
+        
+        try{
+            if(idea.title.length === 0){
+                errors.push("Title must be specified.");
+            }
+            if(idea.title.length >= titleMaxLength){
+                errors.push(`Title must not exceed ${titleMaxLength}.`);
+            }
+            if(idea.description.length >= descriptionMaxLength){
+                errors.push(`Description must not exceed ${descriptionMaxLength}.`);
+            }
+    
+            if(errors.length === 0){
+                return true
+            }
+            else return errors;
         }
-        if(idea.title.length >= titleMaxLength){
-            errors.push(`Title must not exceed ${titleMaxLength}.`);
-        }
-        if(idea.description.length >= descriptionMaxLength){
-            errors.push(`Description must not exceed ${descriptionMaxLength}.`);
+        catch(error){
+            errors.push("Request is malformed");
+            return errors;
         }
 
-        if(errors.length === 0){
-            return true
-        }
-        else return errors;
     }
 
     //Saves an idea into the database
@@ -41,6 +49,7 @@ export class IdeaController {
         })
     }
 
+    //Retrieve all ideas stored in the database.
     static async getIdeas(includeComments = false, includeAuthor = true, includeVotes = true){
         var includedRelations = {
             author: includeAuthor,
@@ -57,6 +66,7 @@ export class IdeaController {
 
     }
 
+    //Deletes an idea from the database
     static async deleteIdea(id: number){
         const deleteVotes = database.vote.deleteMany({
             where:{
@@ -79,6 +89,7 @@ export class IdeaController {
         const transaction = await database.$transaction([deleteVotes, deleteComments, deleteIdea]);
     }
 
+    //Retrieves a specific idea from the database
     static async findIdea(id: number){
         const foundIdea = await database.idea.findUnique({
             where: {

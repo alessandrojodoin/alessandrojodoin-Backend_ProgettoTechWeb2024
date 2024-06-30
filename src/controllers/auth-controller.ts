@@ -33,6 +33,10 @@ export class AuthController{
         return foundUser;
     }
 
+    static verifyToken(token: string){
+        return Jwt.verify(token, process.env.TOKEN_SECRET);
+    }
+
 }
 
    
