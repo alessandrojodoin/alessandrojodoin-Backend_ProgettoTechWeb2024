@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash, hash } from "crypto";
 import database from "../database.js";
 import Jwt from "jsonwebtoken";
 
@@ -35,6 +35,17 @@ export class AuthController{
 
     static verifyToken(token: string){
         return Jwt.verify(token, process.env.TOKEN_SECRET);
+    }
+
+    static async authenticateUser(credentials: {username: string, password: string}){
+        let user = await AuthController.findUser(credentials.username);
+        if(user === null){
+            throw new Error;
+        }
+        if(user.password !== AuthController.hashPassword(credentials.password)){
+            throw new Error;
+        }
+        return this.issueToken(user.username);
     }
 
 }

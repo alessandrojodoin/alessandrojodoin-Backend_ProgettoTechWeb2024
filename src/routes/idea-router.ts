@@ -38,6 +38,7 @@ ideaRouter.post("/ideas", async (req, res) => {
 
     if(isIdeaValid === true){
         IdeaController.saveIdea(idea);
+        res.status(200).send("Idea was successfully submitted.");
     }
     else{
         res.status(400).send("Request is not valid");
@@ -73,7 +74,7 @@ ideaRouter.post("/ideas/:id/votes", async (req, res) => {
 
         const user = await AuthController.findUser(req.body.username);
 
-        VoteController.saveVote({voteType: req.body, user: user, idea: idea});
+        VoteController.saveVote({voteType: req.body.voteType, user: user, idea: idea});
         res.status(200).json(await VoteController.getVotes(idea));
     }
     else{
