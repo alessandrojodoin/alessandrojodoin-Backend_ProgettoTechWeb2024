@@ -70,15 +70,18 @@ ideaRouter.get("/ideas/:id/votes", async (req, res) => {
 ideaRouter.post("/ideas/:id/votes", async (req, res) => {
     const idea = await IdeaController.findIdea(Number(req.params.id));
 
-    if(idea !== null){
+    if((idea !== null) && (idea.authorUsername !== req.body.username)){
 
         const user = await AuthController.findUser(req.body.username);
 
         VoteController.saveVote({voteType: req.body.voteType, user: user, idea: idea});
         res.status(200).json(await VoteController.getVotes(idea));
     }
-    else{
+    else if (idea === null){
         res.status(404).send("Idea does not exist");
+    }
+    else{
+        res.status(401).send("User can not vote on own post.");
     }
 })
 
