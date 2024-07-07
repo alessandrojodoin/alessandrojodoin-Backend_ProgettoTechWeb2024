@@ -1,5 +1,5 @@
 import express from "express";
-//import dotenv from 'dotenv';
+import cors from "cors";
 import 'dotenv/config'
 import { Request, Response, NextFunction } from "express";
 
@@ -9,6 +9,8 @@ import { Request, Response, NextFunction } from "express";
 
 
 const app = express();   
+
+app.use(cors);
 
 //error handler
 app.use( (err: any, req: Request, res: Response, next: NextFunction) => {
