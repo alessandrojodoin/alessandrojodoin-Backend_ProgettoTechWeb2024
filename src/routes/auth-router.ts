@@ -16,7 +16,7 @@ authRouter.post("/auth", async (req, res) => {
 })
 
 authRouter.post("/signup", async (req, res) => {
-    let user = AuthController.findUser(req.body.username);
+    let user = await AuthController.findUser(req.body.username);
     if(user !== null){
         res.status(401).send("Username already taken.");
         return;

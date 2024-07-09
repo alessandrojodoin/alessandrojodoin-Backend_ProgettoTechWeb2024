@@ -8,7 +8,7 @@ import { enforceAuthentication, enforceIdeaAuthorization } from "../middleware/a
 export const ideaRouter = express.Router();
 
 
-ideaRouter.get("/ideas", (req, res) => {
+ideaRouter.get("/ideas", async (req, res) => {
     IdeaController.getIdeas().then(foundIdeas => res.status(200).json(foundIdeas));
 })
 
@@ -47,9 +47,9 @@ ideaRouter.post("/ideas", async (req, res) => {
 
 })
 
-ideaRouter.delete("/ideas/:id", enforceIdeaAuthorization, (req, res) => {
+ideaRouter.delete("/ideas/:id", enforceIdeaAuthorization, async (req, res) => {
     
-    IdeaController.deleteIdea(Number(req.params.id));
+    await IdeaController.deleteIdea(Number(req.params.id));
     res.send("Idea deleted.");
 
 })
@@ -74,7 +74,7 @@ ideaRouter.post("/ideas/:id/votes", async (req, res) => {
 
         const user = await AuthController.findUser(req.body.username);
 
-        VoteController.saveVote({voteType: req.body.voteType, user: user, idea: idea});
+        await VoteController.saveVote({voteType: req.body.voteType, user: user, idea: idea});
         res.status(200).json(await VoteController.getVotes(idea));
     }
     else if (idea === null){
@@ -91,7 +91,7 @@ ideaRouter.delete("/ideas/:id/votes", async (req, res) => {
     if(idea !== null){
 
         const user = await AuthController.findUser(req.body.username);
-        VoteController.cancelVote({user: user, idea: idea});
+        await VoteController.cancelVote({user: user, idea: idea});
         res.status(200).send("Vote removed");
     }
     else{
