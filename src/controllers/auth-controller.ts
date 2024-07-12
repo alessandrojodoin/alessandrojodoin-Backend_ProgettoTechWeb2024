@@ -23,10 +23,13 @@ export class AuthController{
         return Jwt.sign({user: username}, process.env.TOKEN_SECRET, {expiresIn: `${24*60*60}s`});
     }
 
-    static async findUser(username: string){
+    static async findUser(username: string, excludePassword = true){
         const foundUser = await database.user.findUnique({
             where: {
                 username: username
+            },
+            omit: {
+                password: excludePassword
             }
         })
 
@@ -38,7 +41,7 @@ export class AuthController{
     }
 
     static async authenticateUser(credentials: {username: string, password: string}){
-        let user = await AuthController.findUser(credentials.username);
+        let user = await AuthController.findUser(credentials.username, false);
         if(user === null){
             throw new Error;
         }

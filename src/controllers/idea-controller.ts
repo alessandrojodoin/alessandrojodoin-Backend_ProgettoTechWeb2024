@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 import { Idea } from "@prisma/client";
 import database from "../database.js";
+import { VoteController } from "./vote-controller.js";
 
 const titleMaxLength = 100;
 const descriptionMaxLength = 400;
@@ -98,6 +99,23 @@ export class IdeaController {
         })
 
         return foundIdea
+    }
+
+    static async countVotes(idea: Idea){
+        const votes = await VoteController.getVotes(idea);
+        let tally = {
+            upvotes: 0,
+            downvotes: 0
+        }
+        for(let vote of votes){
+            if(vote.type === 1){
+                tally.upvotes = tally.upvotes + 1;
+            }
+            else{
+                tally.downvotes = tally.downvotes + 1;
+            }
+        }
+        return tally;
     }
 
 

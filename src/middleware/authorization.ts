@@ -6,8 +6,9 @@ import { IdeaController } from "../controllers/idea-controller.js";
 
 
 export function enforceAuthentication(req: Request, res: Response, next: NextFunction): null {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader?.split(' ')[1];
+  //const authHeader = req.headers['authorization'];
+  //const token = authHeader?.split(' ')[1];
+  const token = req.headers['authorization'];
   if(!token){
     next({status: 401, message: "Unauthorized"});
     return;
@@ -19,7 +20,7 @@ export function enforceAuthentication(req: Request, res: Response, next: NextFun
     next({status: 401, message: "Unauthorized"});
   }
   
-  req.body.username = decodedToken.username as string;
+  req.body.username = decodedToken.user;
   next();
     
 };

@@ -9,30 +9,39 @@ export const ideaRouter = express.Router();
 
 
 ideaRouter.get("/ideas", async (req, res) => {
-    IdeaController.getIdeas().then(foundIdeas => res.status(200).json(foundIdeas));
+    IdeaController.getIdeas().then(async foundIdeas => {
+        let ideas = [];
+
+        for(let idea of foundIdeas){
+            const tally = await IdeaController.countVotes(idea);
+            ideas.push({...idea, ...tally});
+        }
+
+        res.status(200).json(ideas);
+    })
 })
 
 
-ideaRouter.get("/ideas/:id", (req, res) => {
+ideaRouter.get("/ideas/:id", async (req, res) => {
     IdeaController.findIdea(Number(req.params.id))
-    .then(foundIdea => {
+    .then(async foundIdea => {
         if(foundIdea === null){
             res.status(404).send("Idea was not found.");
         }
         else{
-            res.status(200).json(foundIdea);
+            const tally = await IdeaController.countVotes(foundIdea);
+            res.status(200).json({...foundIdea, ...tally});
         }
         
     })
 })
 
-ideaRouter.post("/ideas", async (req, res) => {
+ideaRouter.post("/ideas", enforceAuthentication, async (req, res) => {
     let idea = req.body;
     //Find User
     const user = await AuthController.findUser(req.body.username);
 
     idea.author = user;
-    delete idea.username;
 
     const isIdeaValid = IdeaController.validateIdea(idea);
 
