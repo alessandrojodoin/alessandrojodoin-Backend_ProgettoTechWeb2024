@@ -102,7 +102,7 @@ export class IdeaController {
     }
 
     static async countVotes(idea: Idea){
-        const votes = await VoteController.getVotes(idea);
+        const votes = await VoteController.getVotes(idea.id);
         let tally = {
             upvotes: 0,
             downvotes: 0

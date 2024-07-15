@@ -69,14 +69,35 @@ ideaRouter.get("/ideas/:id/votes", async (req, res) => {
     const idea = await IdeaController.findIdea(Number(req.params.id));
 
     if(idea !== null){
-        res.status(200).json(await VoteController.getVotes(idea));
+        if(req.query.username !== undefined){
+            const vote = await VoteController.getUserVote(req.query.username as string, idea.id);
+            if(vote !== null){
+                const responseVote = {
+                    type: vote.type === 1 ? "upvote" : "downvote",
+                    user: vote.voterUsername,
+                    idea: vote.ideaId
+                }
+                res.status(200).json(responseVote);
+            }
+            else{
+               res.status(404).json({message: "User has not voted on this post"});
+            }
+           
+
+
+        }
+        else{
+            const votes = 
+            res.status(200).json(await VoteController.getVotes(idea.id));
+        }
+
     }
     else{
         res.status(404).send("Idea does not exist");
     }
 })
 
-ideaRouter.post("/ideas/:id/votes", async (req, res) => {
+ideaRouter.post("/ideas/:id/votes", enforceAuthentication, async (req, res) => {
     const idea = await IdeaController.findIdea(Number(req.params.id));
 
     if((idea !== null) && (idea.authorUsername !== req.body.username)){
@@ -84,7 +105,7 @@ ideaRouter.post("/ideas/:id/votes", async (req, res) => {
         const user = await AuthController.findUser(req.body.username);
 
         await VoteController.saveVote({voteType: req.body.voteType, user: user, idea: idea});
-        res.status(200).json(await VoteController.getVotes(idea));
+        res.status(200).json(await VoteController.getVotes(idea.id));
     }
     else if (idea === null){
         res.status(404).send("Idea does not exist");
@@ -94,7 +115,7 @@ ideaRouter.post("/ideas/:id/votes", async (req, res) => {
     }
 })
 
-ideaRouter.delete("/ideas/:id/votes", async (req, res) => {
+ideaRouter.delete("/ideas/:id/votes", enforceAuthentication, async (req, res) => {
     const idea = await IdeaController.findIdea(Number(req.params.id));
 
     if(idea !== null){

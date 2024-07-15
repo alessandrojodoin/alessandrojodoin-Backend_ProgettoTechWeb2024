@@ -41,13 +41,25 @@ export class VoteController{
         })
     }
 
-    static async getVotes(idea: Idea){
+    static async getVotes(ideaId: number){
         const foundVotes = await database.vote.findMany({
             where: {
-                ideaId: idea.id
+                ideaId: ideaId
             }
         })
-        return foundVotes
+        return foundVotes;
+    }
+
+    static async getUserVote(username: string, ideaId: number){
+        const foundVote = await database.vote.findUnique({
+            where: {
+                voterUsername_ideaId: {
+                    voterUsername: username,
+                    ideaId: ideaId
+                }
+            }
+        })
+        return foundVote;
     }
 
 }
