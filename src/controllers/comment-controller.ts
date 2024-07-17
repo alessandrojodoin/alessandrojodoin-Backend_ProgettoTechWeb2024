@@ -38,14 +38,17 @@ export class CommentController{
         }) 
     }
 
-    static async getComments(includeAuthor: true, includeIdea: false){
+    static async getComments(ideaId: number, includeAuthor = true, includeIdea = false){
         var includedRelations = {
             author: includeAuthor,
             idea: includeIdea
         }
 
         const Comments = await database.comment.findMany({
-            include: includedRelations
+            include: includedRelations,
+            where: {
+                ideaId: ideaId
+            }
         })
 
         return Comments

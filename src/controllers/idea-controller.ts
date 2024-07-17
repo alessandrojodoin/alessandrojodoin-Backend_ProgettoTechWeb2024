@@ -95,6 +95,9 @@ export class IdeaController {
         const foundIdea = await database.idea.findUnique({
             where: {
                 id: id
+            },
+            include: {
+                author: true
             }
         })
 

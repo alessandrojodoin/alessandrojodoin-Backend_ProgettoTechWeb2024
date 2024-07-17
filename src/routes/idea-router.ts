@@ -4,6 +4,7 @@ import { json } from "stream/consumers";
 import { AuthController } from "../controllers/auth-controller.js";
 import { VoteController } from "../controllers/vote-controller.js";
 import { enforceAuthentication, enforceIdeaAuthorization } from "../middleware/authorization.js";
+import { CommentController } from "../controllers/comment-controller.js";
 
 export const ideaRouter = express.Router();
 
@@ -56,7 +57,7 @@ ideaRouter.post("/ideas", enforceAuthentication, async (req, res) => {
 
 })
 
-ideaRouter.delete("/ideas/:id", enforceIdeaAuthorization, async (req, res) => {
+ideaRouter.delete("/ideas/:id", enforceAuthentication, enforceIdeaAuthorization, async (req, res) => {
     
     await IdeaController.deleteIdea(Number(req.params.id));
     res.send("Idea deleted.");
@@ -123,6 +124,40 @@ ideaRouter.delete("/ideas/:id/votes", enforceAuthentication, async (req, res) =>
         const user = await AuthController.findUser(req.body.username);
         await VoteController.cancelVote({user: user, idea: idea});
         res.status(200).send("Vote removed");
+    }
+    else{
+        res.status(404).send("Idea does not exist");
+    }
+})
+
+//Comment routing
+ideaRouter.get("/ideas/:id/comments", async (req, res) => {
+    const foundIdea = await IdeaController.findIdea(Number(req.params.id));
+
+    if(foundIdea !== null){
+        CommentController.getComments(Number(req.params.id)).then(async foundComments => {
+            res.status(200).json(foundComments);
+        })
+    }
+    else{
+        res.status(404).json({message:"Idea does not exist"});
+    }
+})
+
+ideaRouter.post("/ideas/:id/comments", enforceAuthentication, async (req, res) => {
+    const foundIdea = await IdeaController.findIdea(Number(req.params.id));
+
+    let comment = req.body;
+
+    if(foundIdea !== null){
+
+        const user = await AuthController.findUser(req.body.username);
+
+        comment.author = user;
+        comment.replyTo = foundIdea;
+        CommentController.saveComment(comment).then(async foundComments => {
+            res.status(200).send("Comment added");
+        })
     }
     else{
         res.status(404).send("Idea does not exist");
