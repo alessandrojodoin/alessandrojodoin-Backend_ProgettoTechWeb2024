@@ -51,19 +51,33 @@ export class IdeaController {
     }
 
     //Retrieve all ideas stored in the database.
-    static async getIdeas(includeComments = false, includeAuthor = true, includeVotes = true){
+    static async getIdeas(startingDate: Date | null = null, includeComments = false, includeAuthor = true, includeVotes = true){
         var includedRelations = {
             author: includeAuthor,
             votes: includeVotes,
             comments: includeComments
         }
         
-        const Ideas = await database.idea.findMany({
-            include: includedRelations
-        });
+        let ideas;
+        if(startingDate === null){
+            ideas =  await database.idea.findMany({
+                include: includedRelations
+            });
+        }
+        else{
+            ideas =  await database.idea.findMany({
+                include: includedRelations,
+                where: {
+                    createdAt: {
+                        gte: startingDate
+                    }
+                 }
+            });
+        }
 
 
-        return Ideas;
+
+        return ideas;
 
     }
 

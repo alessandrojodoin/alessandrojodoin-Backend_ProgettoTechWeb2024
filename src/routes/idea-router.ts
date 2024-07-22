@@ -5,22 +5,41 @@ import { AuthController } from "../controllers/auth-controller.js";
 import { VoteController } from "../controllers/vote-controller.js";
 import { enforceAuthentication, enforceIdeaAuthorization } from "../middleware/authorization.js";
 import { CommentController } from "../controllers/comment-controller.js";
+import { Idea } from "@prisma/client";
 
 export const ideaRouter = express.Router();
 
 
 ideaRouter.get("/ideas", async (req, res) => {
-    IdeaController.getIdeas().then(async foundIdeas => {
-        let ideas = [];
+    let foundIdeas: Idea[];
 
-        for(let idea of foundIdeas){
-            const tally = await IdeaController.countVotes(idea);
-            ideas.push({...idea, ...tally});
+    if(req.query.maxAge === undefined){
+        foundIdeas = await IdeaController.getIdeas();
+    }
+    else{
+        let startingDate = new Date();
+        let dateOffset = (24*60*60*1000);
+        try{
+            dateOffset = dateOffset * Number(req.query.maxAge); 
         }
+        catch(error){
+            res.status(400).json({message: "Invalid Request"});
+        }
+        startingDate.setTime(startingDate.getTime() - dateOffset);
+        foundIdeas = await IdeaController.getIdeas(startingDate);
+    }
+    
 
-        res.status(200).json(ideas);
-    })
+    let ideas = [];
+
+    for(let idea of foundIdeas){
+        const tally = await IdeaController.countVotes(idea);
+        ideas.push({...idea, ...tally});
+    }
+
+    res.status(200).json(ideas);
 })
+
 
 
 ideaRouter.get("/ideas/:id", async (req, res) => {
