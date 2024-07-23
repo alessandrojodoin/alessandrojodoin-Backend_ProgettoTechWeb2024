@@ -100,7 +100,7 @@ ideaRouter.get("/ideas/:id/votes", async (req, res) => {
                 res.status(200).json(responseVote);
             }
             else{
-               res.status(404).json({message: "User has not voted on this post"});
+               res.status(200).json({message: "User has not voted on this post"});
             }
            
 
@@ -174,9 +174,15 @@ ideaRouter.post("/ideas/:id/comments", enforceAuthentication, async (req, res) =
 
         comment.author = user;
         comment.replyTo = foundIdea;
-        CommentController.saveComment(comment).then(async foundComments => {
-            res.status(200).send("Comment added");
-        })
+        if(CommentController.validateComment(comment) === true){
+            CommentController.saveComment(comment).then(async foundComments => {
+                res.status(200).send("Comment added");
+            })
+        }
+        else{
+            res.status(401).send("Request invalid");
+        }
+
     }
     else{
         res.status(404).send("Idea does not exist");

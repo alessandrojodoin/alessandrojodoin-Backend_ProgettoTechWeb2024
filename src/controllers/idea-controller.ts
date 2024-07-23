@@ -3,7 +3,7 @@ import { Idea } from "@prisma/client";
 import database from "../database.js";
 import { VoteController } from "./vote-controller.js";
 
-const titleMaxLength = 100;
+const titleMaxLength = 50;
 const descriptionMaxLength = 400;
 
 

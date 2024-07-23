@@ -10,7 +10,7 @@ export class CommentController{
 
     static validateComment(comment: {text: string, author: User, replyTo: Idea}){
         let errors: string[] = [];
-        if(comment.text.length === 0){
+        if(comment.text.length === 0 || comment.text === ""){
             errors.push("Contents must be specified.");
         }
         if(comment.text.length >= this.textMaxLength){

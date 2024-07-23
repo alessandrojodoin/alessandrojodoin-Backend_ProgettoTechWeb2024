@@ -11,11 +11,15 @@ authRouter.post("/auth", async (req, res) => {
         res.status(200).json(token);
     }
     catch(error){
-        res.status(401).send("Invalid Credentials.");
+        res.status(401).json({message: "Invalid Credentials."});
     }
 })
 
 authRouter.post("/signup", async (req, res) => {
+    if(req.body.username === "" || req.body.password === ""){
+        res.status(401).json({message: "Request invalid"});
+        return;
+    }
     let user = await AuthController.findUser(req.body.username);
     if(user !== null){
         res.status(401).json({message: "Username already taken."});

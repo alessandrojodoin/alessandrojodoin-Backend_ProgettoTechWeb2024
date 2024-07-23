@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import 'dotenv/config'
+import 'dotenv/config';
 import { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import { ideaRouter } from "./routes/idea-router.js";

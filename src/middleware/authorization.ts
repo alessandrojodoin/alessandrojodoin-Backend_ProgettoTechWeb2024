@@ -2,6 +2,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { AuthController } from "../controllers/auth-controller.js";
 import { Request, Response, NextFunction } from "express";
 import { IdeaController } from "../controllers/idea-controller.js";
+import { CommentController } from "../controllers/comment-controller.js";
 
 
 
