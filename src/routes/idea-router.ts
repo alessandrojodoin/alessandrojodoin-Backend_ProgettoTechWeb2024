@@ -46,7 +46,7 @@ ideaRouter.get("/ideas/:id", async (req, res) => {
     IdeaController.findIdea(Number(req.params.id))
     .then(async foundIdea => {
         if(foundIdea === null){
-            res.status(404).send("Idea was not found.");
+            res.status(404).json({message: "Idea was not found."});
         }
         else{
             const tally = await IdeaController.countVotes(foundIdea);
@@ -113,7 +113,7 @@ ideaRouter.get("/ideas/:id/votes", async (req, res) => {
 
     }
     else{
-        res.status(404).send("Idea does not exist");
+        res.status(404).json({message: "Idea does not exist"});
     }
 })
 
